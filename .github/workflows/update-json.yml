@@ -1,0 +1,49 @@
+name: Auto Update Nuvio Version
+
+on:
+  schedule:
+    # Tự động chạy kiểm tra vào 00:00 UTC mỗi ngày
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Cho phép bấm chạy thủ công từ giao diện web
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Fetch Latest Nuvio Release
+        id: get_release
+        run: |
+          # Lấy thông tin bản release mới nhất từ API GitHub của NuvioTV
+          LATEST_TAG=$(curl -s https://api.github.com/repos/NuvioMedia/NuvioTV/releases/latest | jq -r .tag_name)
+          CLEAN_VER=$(echo $LATEST_TAG | sed 's/^v//')
+          
+          echo "VERSION=$CLEAN_VER" >> $GITHUB_ENV
+          echo "TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Update JSON File
+        run: |
+          # Tính versionCode dạng số nguyên từ phiên bản (ví dụ 1.2.1 -> 10201)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
+          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+          # Cập nhật thông tin vào file store.json
+          jq --arg ver "$VERSION" \
+             --argjson code "$VERSION_CODE" \
+             --arg url "https://github.com/NuvioMedia/NuvioTV/releases/download/$TAG/app-release.apk" \
+             '.apps [] |= if .packageName == "tv.nuvio.app" then .version = $ver | .versionCode = $code | .apkUrl = $url else . end' \
+             store.json > temp.json && mv temp.json store.json
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git status
+          git add store.json
+          git commit -m "auto: update Nuvio to version ${{ env.VERSION }}" || exit 0
+          git push
