@@ -1,0 +1,58 @@
+name: Auto Fetch Xperience Movies for Launchpad
+
+on:
+  schedule:
+    # Tự động cập nhật vào 01:00 UTC hàng ngày
+    - cron: '0 1 * * *'
+  workflow_dispatch: # Cho phép bấm chạy thủ công
+
+permissions:
+  contents: write
+
+jobs:
+  update-movies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Movies from Xperience Catalog
+        run: |
+          # 1. Khai báo Manifest URL Xperience của bạn
+          MANIFEST_URL="https://xperience-app.com/manifest/0f6ce502-95d4-46ad-842c-426f387c391c/eyJhbGciOiJIUzI1NiJ9.eyJwaWQiOiIwZjZjZTUwMi05NWQ0LTQ2YWQtODQyYy00MjZmMzg3YzM5MWMiLCJraWQiOiI2NjVmODRjNS04YzczLTQyZjYtOTY1YS1lNDY3YTllMjBmMDAiLCJzY29wZSI6Im1hbmlmZXN0Iiwic3ViIjoiMzVlN2M5MzctNjI4YS00NmY2LWFlZjMtZmVlNmQ3NGM0NDViIiwiaWF0IjowfQ.-RbqiKLp3i55fKXlualcmJsv9ViRf0GWjEge6_7EkGw/manifest.json"
+          
+          # Tách lấy Base URL (bỏ phần /manifest.json ở cuối)
+          BASE_URL=$(echo "$MANIFEST_URL" | sed 's|/manifest.json$||')
+
+          # 2. Đọc manifest để tìm catalogID đầu tiên của mục "movie"
+          CATALOG_ID=$(curl -s "$MANIFEST_URL" | jq -r '.catalogs[] | select(.type=="movie") | .id' | head -n 1)
+          
+          # Nếu không tìm thấy catalog riêng, sử dụng mặc định là "top" hoặc "popular"
+          if [ -z "$CATALOG_ID" ] || [ "$CATALOG_ID" == "null" ]; then
+            CATALOG_ID="top"
+          fi
+
+          echo "Catalog ID đang sử dụng: $CATALOG_ID"
+
+          # 3. Gọi API lấy dữ liệu phim thực tế từ Xperience
+          curl -s "$BASE_URL/catalog/movie/$CATALOG_ID.json" -o xperience_raw.json
+
+          # 4. Trích xuất thông tin sang cấu trúc movies.json chuẩn cho Launchpad
+          jq '{
+            name: "Xperience Movie Recommendations",
+            type: "vod",
+            items: [.metas[0:20][]? | {
+              name: .name,
+              poster: .poster,
+              description: (.description // "Chưa có thông tin mô tả"),
+              streamUrl: ("nuvio://detail/movie/" + .id)
+            }]
+          }' xperience_raw.json > movies.json
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add movies.json
+          git commit -m "auto: update Xperience movies catalog" || exit 0
+          git push
