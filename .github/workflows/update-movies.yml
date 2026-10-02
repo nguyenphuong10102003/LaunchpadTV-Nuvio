@@ -20,24 +20,41 @@ jobs:
           MANIFEST_URL="https://xperience-app.com/manifest/0f6ce502-95d4-46ad-842c-426f387c391c/eyJhbGciOiJIUzI1NiJ9.eyJwaWQiOiIwZjZjZTUwMi05NWQ0LTQ2YWQtODQyYy00MjZmMzg3YzM5MWMiLCJraWQiOiI2NjVmODRjNS04YzczLTQyZjYtOTY1YS1lNDY3YTllMjBmMDAiLCJzY29wZSI6Im1hbmlmZXN0Iiwic3ViIjoiMzVlN2M5MzctNjI4YS00NmY2LWFlZjMtZmVlNmQ3NGM0NDViIiwiaWF0IjowfQ.-RbqiKLp3i55fKXlualcmJsv9ViRf0GWjEge6_7EkGw/manifest.json"
           BASE_URL=$(echo "$MANIFEST_URL" | sed 's|/manifest.json$||')
 
-          # Tải catalog phim từ Xperience
-          curl -s "$BASE_URL/catalog/movie/top.json" -o xperience_raw.json || curl -s "$BASE_URL/catalog/movie/popular.json" -o xperience_raw.json
+          # 1. Lấy thông tin Manifest để tìm Catalog ID
+          echo "Đang đọc Manifest..."
+          MANIFEST_DATA=$(curl -s "$MANIFEST_URL")
+          CATALOG_ID=$(echo "$MANIFEST_DATA" | jq -r '.catalogs[]? | select(.type=="movie") | .id' | head -n 1)
 
-          # Xuất ra file movies.json với cấu trúc IPTV/VOD Object chuẩn
+          if [ -z "$CATALOG_ID" ] || [ "$CATALOG_ID" == "null" ]; then
+            CATALOG_ID="top"
+          fi
+          echo "Catalog ID phát hiện: $CATALOG_ID"
+
+          # 2. Thử gọi API Catalog của Xperience
+          curl -s "$BASE_URL/catalog/movie/$CATALOG_ID.json" -o raw.json
+
+          # 3. Kiểm tra xem có dữ liệu phim không, nếu trống thì tự chuyển sang Cinemeta Catalog
+          COUNT=$(jq '.metas | length' raw.json 2>/dev/null || echo 0)
+          if [ "$COUNT" -eq 0 ] || [ "$COUNT" == "null" ]; then
+            echo "API Xperience trống, chuyển sang lấy nguồn Cinemeta..."
+            curl -s "https://v3-cinemeta.strem.io/catalog/movie/top.json" -o raw.json
+          fi
+
+          # 4. Chuyển đổi sang định dạng JSON IPTV chuẩn cho Launchpad
           jq '{
-            name: "Đề xuất Phim Xperience",
-            channels: [.metas[]? | {
+            name: "Đề Xuất Phim Hot",
+            channels: [.metas[0:20][]? | {
               name: .name,
               logo: .poster,
-              group: "Phim Hot",
+              group: "Phim Đề Xuất",
               url: ("nuvio://detail/movie/" + .id)
             }]
-          }' xperience_raw.json > movies.json
+          }' raw.json > movies.json
 
       - name: Commit and Push Changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add movies.json
-          git commit -m "auto: fix movies.json structure for Launchpad" || exit 0
+          git commit -m "auto: fix empty channels issue" || exit 0
           git push
