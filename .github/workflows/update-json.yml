@@ -6,12 +6,15 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch: # Cho phép bấm chạy thủ công từ giao diện web
 
+permissions:
+  contents: write
+
 jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Fetch Latest Nuvio Release
         id: get_release
@@ -43,7 +46,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git status
           git add store.json
           git commit -m "auto: update Nuvio to version ${{ env.VERSION }}" || exit 0
           git push
