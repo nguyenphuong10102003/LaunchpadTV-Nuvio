@@ -1,0 +1,38 @@
+name: Auto Fetch Sofascore Live Scores
+
+on:
+  schedule:
+    # Tự động chạy mỗi 15 phút một lần
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Cho phép bấm chạy thủ công
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-sofascore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Live Scores from Sofascore
+        run: |
+          # 1. Gọi API Sofascore lấy danh sách các trận bóng đá đang diễn ra
+          curl -s -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+               "https://www.sofascore.com/api/v1/sport/football/events/live" -o raw_sofascore.json
+
+          # 2. Chuyển đổi JSON Sofascore sang chuẩn RSS JSON cho Launchpad TV
+          jq '[.events[]? | {
+            title: ((.homeTeam.shortName // .homeTeam.name) + " " + (.homeScore.current|tostring) + " - " + (.awayScore.current|tostring) + " " + (.awayTeam.shortName // .awayTeam.name) + " (" + (.status.description // "LIVE") + ")"),
+            description: ("Giải đấu: " + .tournament.name),
+            pubDate: (now | strftime("%a, %d %b %Y %H:%M:%S GMT"))
+          }]' raw_sofascore.json > sofascore_rss.json
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add sofascore_rss.json
+          git commit -m "auto: update sofascore live scores" || exit 0
+          git push
