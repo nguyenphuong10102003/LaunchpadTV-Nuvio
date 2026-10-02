@@ -1,4 +1,125 @@
 {
-  "name": "Đề xuất Phim Xperience",
-  "channels": []
+  "name": "Đề Xuất Phim Hot",
+  "channels": [
+    {
+      "name": "Người Nhện: Khởi Đầu Mới",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt22084616.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt22084616"
+    },
+    {
+      "name": "Vùng Đất Quỷ Dữ",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt35538033.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt35538033"
+    },
+    {
+      "name": "Coyote vs. Acme",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt1756855.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt1756855"
+    },
+    {
+      "name": "The Odyssey",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt33764258.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt33764258"
+    },
+    {
+      "name": "Ngày Tàn Của Phố Oak",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt27165187.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt27165187"
+    },
+    {
+      "name": "Phi Vụ Sửa Sai",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt9601292.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt9601292"
+    },
+    {
+      "name": "The Love Hypothesis",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt22526100.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt22526100"
+    },
+    {
+      "name": "Runner",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt31349844.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt31349844"
+    },
+    {
+      "name": "Bầy Xác Sống",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt34385135.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt34385135"
+    },
+    {
+      "name": "Tàu Buôn Người",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt32338669.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt32338669"
+    },
+    {
+      "name": "Câu Chuyện Đồ Chơi 5",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt29355505.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt29355505"
+    },
+    {
+      "name": "UNABOMBER",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt6933238.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt6933238"
+    },
+    {
+      "name": "Digger",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt31450459.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt31450459"
+    },
+    {
+      "name": "Trái Tim Quái Thú",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt7526136.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt7526136"
+    },
+    {
+      "name": "Resident Evil: Quỷ Dữ Trỗi Dậy",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt6920084.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt6920084"
+    },
+    {
+      "name": "Ám Ảnh",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt37287335.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt37287335"
+    },
+    {
+      "name": "Tro Tàn Vùng Lên",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt36983905.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt36983905"
+    },
+    {
+      "name": "Gã Bán Kem",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt36893729.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt36893729"
+    },
+    {
+      "name": "Avengers: Hồi Kết",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt4154796.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt4154796"
+    },
+    {
+      "name": "Phát Bắn Cuối",
+      "logo": "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/tt37971717.jpg",
+      "group": "Phim Đề Xuất",
+      "url": "nuvio://detail/movie/tt37971717"
+    }
+  ]
 }
