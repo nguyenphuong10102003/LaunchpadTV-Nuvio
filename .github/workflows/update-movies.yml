@@ -15,46 +15,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch Movies from Xperience Catalog
+      - name: Fetch Movies and Convert to M3U
         run: |
           MANIFEST_URL="https://xperience-app.com/manifest/0f6ce502-95d4-46ad-842c-426f387c391c/eyJhbGciOiJIUzI1NiJ9.eyJwaWQiOiIwZjZjZTUwMi05NWQ0LTQ2YWQtODQyYy00MjZmMzg3YzM5MWMiLCJraWQiOiI2NjVmODRjNS04YzczLTQyZjYtOTY1YS1lNDY3YTllMjBmMDAiLCJzY29wZSI6Im1hbmlmZXN0Iiwic3ViIjoiMzVlN2M5MzctNjI4YS00NmY2LWFlZjMtZmVlNmQ3NGM0NDViIiwiaWF0IjowfQ.-RbqiKLp3i55fKXlualcmJsv9ViRf0GWjEge6_7EkGw/manifest.json"
           BASE_URL=$(echo "$MANIFEST_URL" | sed 's|/manifest.json$||')
 
-          # 1. Lấy thông tin Manifest để tìm Catalog ID
-          echo "Đang đọc Manifest..."
-          MANIFEST_DATA=$(curl -s "$MANIFEST_URL")
-          CATALOG_ID=$(echo "$MANIFEST_DATA" | jq -r '.catalogs[]? | select(.type=="movie") | .id' | head -n 1)
+          # 1. Lấy dữ liệu catalog phim
+          echo "Đang gọi API..."
+          curl -s "$BASE_URL/catalog/movie/top.json" -o raw.json || curl -s "https://v3-cinemeta.strem.io/catalog/movie/top.json" -o raw.json
 
-          if [ -z "$CATALOG_ID" ] || [ "$CATALOG_ID" == "null" ]; then
-            CATALOG_ID="top"
-          fi
-          echo "Catalog ID phát hiện: $CATALOG_ID"
+          # 2. Tạo file playlist M3U chuẩn cho mục Truyền hình Launchpad
+          echo "#EXTM3U" > movies.m3u
 
-          # 2. Thử gọi API Catalog của Xperience
-          curl -s "$BASE_URL/catalog/movie/$CATALOG_ID.json" -o raw.json
-
-          # 3. Kiểm tra xem có dữ liệu phim không, nếu trống thì tự chuyển sang Cinemeta Catalog
-          COUNT=$(jq '.metas | length' raw.json 2>/dev/null || echo 0)
-          if [ "$COUNT" -eq 0 ] || [ "$COUNT" == "null" ]; then
-            echo "API Xperience trống, chuyển sang lấy nguồn Cinemeta..."
-            curl -s "https://v3-cinemeta.strem.io/catalog/movie/top.json" -o raw.json
-          fi
-
-          # 4. Chuyển đổi sang định dạng JSON IPTV chuẩn cho Launchpad
-          jq '{
-            name: "Đề Xuất Phim Hot",
-            channels: [.metas[0:20][]? | {
-              name: .name,
-              logo: .poster,
-              group: "Phim Đề Xuất",
-              url: ("nuvio://detail/movie/" + .id)
-            }]
-          }' raw.json > movies.json
+          jq -r '.metas[0:30][]? | "#EXTINF:-1 tvg-logo=\"" + (.poster // "") + "\" group-title=\"Phim Đề Xuất\"," + .name + "\nnuvio://detail/movie/" + .id' raw.json >> movies.m3u
 
       - name: Commit and Push Changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add movies.json
-          git commit -m "auto: fix empty channels issue" || exit 0
+          git add movies.m3u
+          git commit -m "auto: generate movies.m3u playlist" || exit 0
           git push
